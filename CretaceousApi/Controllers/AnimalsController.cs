@@ -36,5 +36,20 @@ namespace CretaceousApi.Controllers
 
       return animal; // GetAnimal() endpoint returns C# object, but .NET auto converts it into JSON
     }
+
+    // POST api/animals
+    [HttpPost] // HTTP action method specified with Http verb template [HttpPost]
+    public async Task<ActionResult<Animal>> Post(Animal animal) // takes an Animal parameter; Comes from the body of the request
+    {
+      _db.Animals.Add(animal);
+      await _db.SaveChangesAsync();
+      // CreatedAtAction() - A ControllerBase class method; handles returning HTTP 201 Created. Lets us specify Location of newly created object.
+      // In sum, Post() controller action returns newly created Animal object to user, along with "201 Created" status code.
+      return CreatedAtAction(nameof(GetAnimal), new { id = animal.AnimalId }, animal);
+      // CreatedAtAction() method takes 3 arguments to specify location of new object
+      // 1. Name of controller action: GetAnimal()
+      // 2. Route values required for controller action: `id` parameter for GetAnimal() action
+      // 3. Resource that was created in this action.
+    } // Does not return a view
   }
 }
