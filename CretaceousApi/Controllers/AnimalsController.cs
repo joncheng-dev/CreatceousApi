@@ -51,5 +51,60 @@ namespace CretaceousApi.Controllers
       // 2. Route values required for controller action: `id` parameter for GetAnimal() action
       // 3. Resource that was created in this action.
     } // Does not return a view
+
+    // PUT: api/Animals/5
+    // [HttpPut] verb template specifies the action request made to controller
+    [HttpPut("{id}")] // {id} parameter determines which animal is to be updated
+    public async Task<IActionResult> Put(int id, Animal animal)
+    {
+      if (id != animal.AnimalId) // check if {id} in request URL matches animal.AnimalId
+      {
+        return BadRequest(); // returns HTTP status code 400 Bad Request
+      }
+
+      _db.Animals.Update(animal); // If correct, update animal in database
+
+      try
+      {
+        await _db.SaveChangesAsync(); // try to save asynchronously
+      }
+      catch (DbUpdateConcurrencyException)
+      {
+        if (!AnimalExists(id))  
+        // handle error if AnimalId does not exist; custom created private method
+        {
+          return NotFound(); // via ControllerBase.NotFound() method
+          // returns 404 Not Found HTTP Status code
+        }
+        else
+        {
+          throw; // throw what? How can I follow this?
+        }
+      }
+      return NoContent(); // HTTP status code 204 No Content. Request successful, but no need to navigate away from page.
+    }
+
+    private bool AnimalExists(int id)
+    {
+      return _db.Animals.Any(e => e.AnimalId == id);
+    }
+
+    // DELETE: api/Animals/5
+    [HttpDelete("{id}")] // [HttpDelete] verb template in new controller action DeleteAnimal(). Takes argument "{id}". We rely on URL to get animal's id.
+    // DeleteAnimal() method is asynchronous; makes use of ControllerBase class methods to return HTTP status codes
+    public async Task<IActionResult> DeleteAnimal(int id)
+    {
+      Animal animal = await _db.Animals.FindAsync(id);
+      if (animal == null)
+      {
+        return NotFound(); // via ControllerBase.NotFound() method
+        // returns 404 Not Found HTTP Status code
+      }
+
+      _db.Animals.Remove(animal);
+      await _db.SaveChangesAsync();
+
+      return NoContent(); // HTTP status code 204 No Content if successful
+    }    
   }
 }
