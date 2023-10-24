@@ -35,7 +35,7 @@ namespace CretaceousApi.Migrations
 
                     b.HasKey("AnimalId");
 
-                    b.ToTable("Animals");
+                    b.ToTable("Animals", (string)null);
 
                     b.HasData(
                         new

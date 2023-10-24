@@ -17,9 +17,27 @@ namespace CretaceousApi.Controllers
 
     // GET api/animals
     [HttpGet] // Get() action returns ActionResult type <IEnumerable<Animal>>
-    public async Task<ActionResult<IEnumerable<Animal>>> Get()
+    public async Task<ActionResult<IEnumerable<Animal>>> Get(string species, string name, int minimumAge)
     {
-      return await _db.Animals.ToListAsync(); // Get() endpoint returns C# object, but .NET auto converts it into JSON
+      IQueryable<Animal> query = _db.Animals.AsQueryable();
+
+      if (species != null)
+      {
+        query = query.Where(entry => entry.Species == species);
+      }
+
+      if(name != null)
+      {
+        query = query.Where(entry => entry.Name == name);
+      }
+
+      if (minimumAge > 0)
+      {
+        query = query.Where(entry => entry.Age >= minimumAge);
+      }
+
+      return await query.ToListAsync();
+      // return await _db.Animals.ToListAsync(); // Get() endpoint returns C# object, but .NET auto converts it into JSON
     }
 
     // GET: api/Animals/5
