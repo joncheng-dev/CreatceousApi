@@ -17,7 +17,7 @@ namespace CretaceousApi.Controllers
 
     // GET api/animals
     [HttpGet] // Get() action returns ActionResult type <IEnumerable<Animal>>
-    public async Task<ActionResult<IEnumerable<Animal>>> Get(string species, string name, int minimumAge)
+    public async Task<ActionResult<PaginatedList<Animal>>> Get(string species, string name, int minimumAge, int pageIndex = 1, int pageSize = 10)
     {
       IQueryable<Animal> query = _db.Animals.AsQueryable();
 
@@ -36,7 +36,14 @@ namespace CretaceousApi.Controllers
         query = query.Where(entry => entry.Age >= minimumAge);
       }
 
-      return await query.ToListAsync();
+      var paginatedListOfAnimals = await PaginatedList<Animal>.CreateAsync(query, pageIndex, pageSize);
+
+      if(paginatedListOfAnimals.Count == 0)
+      {
+        return NotFound();
+      }
+
+      return paginatedListOfAnimals;
       // return await _db.Animals.ToListAsync(); // Get() endpoint returns C# object, but .NET auto converts it into JSON
     }
 
@@ -126,3 +133,30 @@ namespace CretaceousApi.Controllers
     }    
   }
 }
+
+
+
+    // // GET api/animals
+    // [HttpGet] // Get() action returns ActionResult type <IEnumerable<Animal>>
+    // public async Task<ActionResult<IEnumerable<Animal>>> Get(string species, string name, int minimumAge)
+    // {
+    //   IQueryable<Animal> query = _db.Animals.AsQueryable();
+
+    //   if (species != null)
+    //   {
+    //     query = query.Where(entry => entry.Species == species);
+    //   }
+
+    //   if(name != null)
+    //   {
+    //     query = query.Where(entry => entry.Name == name);
+    //   }
+
+    //   if (minimumAge > 0)
+    //   {
+    //     query = query.Where(entry => entry.Age >= minimumAge);
+    //   }
+
+    //   return await query.ToListAsync();
+    //   // return await _db.Animals.ToListAsync(); // Get() endpoint returns C# object, but .NET auto converts it into JSON
+    // }

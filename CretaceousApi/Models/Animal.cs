@@ -6,7 +6,7 @@ namespace CretaceousApi.Models
   {
     public int AnimalId { get; set; }
     [Required]
-    [StringLength(20)]
+    [StringLength(40)]
     public string Name { get; set; }
     [Required]
     public string Species { get; set; }
