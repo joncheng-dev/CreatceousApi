@@ -17,9 +17,8 @@ A Web API app that shares data about a wildlife park consisting of creatures fro
 - _C#_
 - _.NET 6_
 - _ASP.NET Core MVC_
-- _Razor View Engine_
+- _MySQL_
 - _MySQL Workbench_
-- _MySQL Community Server_
 - _Entity Framework Core_
 - _Swashbuckle v6.2.3_
 - _Postman v10.19_
@@ -28,13 +27,15 @@ A Web API app that shares data about a wildlife park consisting of creatures fro
 
 ### Required Technology
 
-- _Verify that you have the required technology installed for MySQL (https://dev.mysql.com/doc/mysql-installation-excerpt/5.7/en/) and MySQL Workbench (https://dev.mysql.com/doc/workbench/en/)._
+- _Verify that you have the required technology installed for [MySQL](https://dev.mysql.com/doc/mysql-installation-excerpt/5.7/en/) and [MySQL Workbench](https://dev.mysql.com/doc/workbench/en/)._
 - _Also check that Entity Framework Core's `dotnet-ef` tool is installed on your system so that it can perform database migrations and updates. Run the following command in your terminal:_
   > ```bash
   > $ dotnet tool install --global dotnet-ef --version 6.0.0
   > ```
 
 ### Setting Up the Project
+
+#### Clone the Project
 
 _1. Open your terminal (e.g., Terminal or GitBash)._
 
@@ -46,7 +47,9 @@ _3. Clone the repository from the GitHub link by entering in this command:_
 > $ git clone https://github.com/joncheng-dev/CretaceousApi.Solution.git
 > ```
 
-_4. Navigate to the project's production directory `CretaceousApi.Solution/CretaceousApi`, and create a new file called `appsettings.json`. Within the `appsettings.json` file, add the following code snippet. Change the server and port and needed. Replace the `uid`, and `pwd` values with your username and password for MySQL. Under `database`, add a fitting name -- although `cretaceous_api` is suggested for clarity of purpose._
+#### Set up a Connection String to Database
+
+_Navigate to the project's production directory `CretaceousApi.Solution/CretaceousApi`, and create a new file called `appsettings.json`. Within the `appsettings.json` file, add the following code snippet. Change the server and port and needed. Replace the `uid`, and `pwd` values with your username and password for MySQL. Under `database`, add a fitting name -- although `cretaceous_api` is suggested for clarity of purpose._
 
 ```json
 {
@@ -63,7 +66,9 @@ _4. Navigate to the project's production directory `CretaceousApi.Solution/Creta
 }
 ```
 
-_5. Make sure your ports are different for this Web API app and your client app -- if you are running a client app as a means to make requests from the API. In this app's `Properties/launchSettings.json` file, check to see that the `applicationUrl` key is set to a different set of ports than your client app. (i.e. in the CretaceousApi app, we have it set to 5001 and 5000 as shown in the `launchSettings.json` snippet below)._
+#### Check for Port Conflicts
+
+_Make sure your ports are different for this Web API app and your client app -- if you are running a client app as a means to make requests from the API. In this app's `Properties/launchSettings.json` file, check to see that the `applicationUrl` key is set to a different set of ports than your client app. (i.e. in the CretaceousApi app, we have it set to 5001 and 5000 as shown in the `launchSettings.json` snippet below)._
 
 ```json
 "CretaceousApi": {
@@ -78,7 +83,9 @@ _5. Make sure your ports are different for this Web API app and your client app 
   }
 ```
 
-_6. In the terminal, while in the project's production directory `CretaceousApi`, run the command below. It will utilize the repository's migrations to generate the database with appropriate modifications via Entity Framework Core. You may opt to verify that the database has been created successfully in MySQL Workbench._
+#### Generate the Database
+
+_In the terminal, while in the project's production directory `CretaceousApi`, run the command below. It will utilize the repository's migrations to generate the database with appropriate modifications via Entity Framework Core. You may opt to verify that the database has been created successfully in MySQL Workbench._
 
 > ```bash
 > $ dotnet ef database update
@@ -86,7 +93,7 @@ _6. In the terminal, while in the project's production directory `CretaceousApi`
 
 ## Launching the API
 
-- _In the command line, while in the project's production directory `CretaceousApi.Solution/CretaceousApi`, enter the command `dotnet run` to compile and execute the application. Afterwards, the API is accessible via a client._
+_In the command line, while in the project's production directory `CretaceousApi.Solution/CretaceousApi`, enter the command `dotnet run` to compile and execute the application. Afterwards, the API is accessible via a client._
 
 > ```bash
 > $ dotnet run
@@ -98,10 +105,10 @@ To explore the API endpoints, use a client such as a browser, Postman, or Swagge
 
 #### Note on Pagination
 
-CretaceousApi is set to return 10 results per page. To make modifications, opt to do one of the following:
+CretaceousApi is set to return the first index of results, and show up to 10 results per page. To make modifications, opt to do one of the following:
 
-- _navigate to the project's Controller directory, file `AnimalsController.cs`, and edit the HttpGet controller's Get() action parameter `int pageSize = 10` to a different integer value_
-- _change the parameters in the http request: `http://localhost:5000/api/Animals?pageIndex=1&pageSize=10`. Set the `pageSize` equal to a different integer value, such as 20 to return twenty results per page._
+- _Navigate to the project's Controller directory, file `AnimalsController.cs`, and edit the HttpGet controller's Get() action parameters `pageIndex = 1` and `int pageSize = 10` to different integer values for pageIndex and pageSize respectively._
+- _Change the parameters in the http request: `http://localhost:5000/api/Animals?pageIndex=1&pageSize=10`. Set the parameters `pageIndex` and `pageSize` to different integer values, such as 2 for pageIndex to see the second page of all results, and 20 for pageSize to return twenty results per page, respectively._
 
 ### API Endpoints
 
@@ -119,16 +126,32 @@ Base URL: `http://localhost:5000`
 
 #### Path Parameters
 
-| Parameter  |  Type   | Default | Required | Description                                      |
-| :--------: | :-----: | :-----: | :------: | ------------------------------------------------ |
-|  species   | string  |  none   |  false   | Returns matches by species.                      |
-|    name    | string  |  none   |  false   | Returns matches by animal name.                  |
-| minimumAge | integer |  none   |  false   | Returns animals at least specified age or older. |
+| Parameter  |  Type   | Default | Required | Description                                             |
+| :--------: | :-----: | :-----: | :------: | ------------------------------------------------------- |
+| pageIndex  | integer |    1    |  false   | Returns the requested index page.                       |
+|  pageSize  | integer |   10    |  false   | Returns up to the requested number of animals per page. |
+|  species   | string  |  none   |  false   | Returns matches by species.                             |
+|    name    | string  |  none   |  false   | Returns matches by animal name.                         |
+| minimumAge | integer |  none   |  false   | Returns animals at least specified age or older.        |
 
-#### Example Query
+#### Example Queries
+
+The following query will return the first ten results.
 
 ```
-http://localhost:5000/api/Animals?species=dinosaur&minimumAge=20
+http://localhost:5000/api/Animals?pageIndex=1&pageSize=10
+```
+
+The following query will return the first ten results of animals of species dinosaur.
+
+```
+http://localhost:5000/api/Animals?species=dinosaur&pageIndex=1&pageSize=10
+```
+
+The following query will return the first ten results of animals of species dinosaur, with minimum age 5.
+
+```
+http://localhost:5000/api/Animals?species=dinosaur&minimumAge=20&pageIndex=1&pageSize=10
 
 ```
 
@@ -149,6 +172,7 @@ http://localhost:5000/api/Animals?species=dinosaur&minimumAge=20
 
 ## License
 
+```
 MIT License
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
@@ -158,3 +182,6 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 Copyright (c) _2023_ _Jonathan Cheng_
+```
+
+<a align=left href="#">Return to Top</a>
